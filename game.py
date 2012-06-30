@@ -46,8 +46,9 @@ def run():
     playerGroup = pygame.sprite.RenderPlain(player)
     
     pygame.mixer.init()
+    splat = pygame.mixer.Sound("sound/splat.ogg")
     
-    
+    dead = False
     bail = False
     while not bail:
         deltat = clock.tick(60)
@@ -80,9 +81,11 @@ def run():
 
         carGroup.update()
         playerGroup.update()
-        collisions = pygame.sprite.spritecollide(player, carGroup, False)
-        if len(collisions) > 0:
-            pass #play a sound
+        if not dead:
+            collisions = pygame.sprite.spritecollide(player, carGroup, False)
+            if len(collisions) > 0:
+                splat.play()
+                dead = True
         
         #render
         screen.fill((0,0,0))
