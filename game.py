@@ -6,10 +6,10 @@ import random
 class Vehicle(pygame.sprite.DirtySprite):
     def __init__(self, image):
         super(Vehicle, self).__init__()
-        self.image = pygame.image.load(image)
+        self.image = image
         self.x = 0
         self.y = 0
-        self.rect = pygame.Rect(0, 0, 50, 50)
+        self.rect = pygame.Rect(0, 0, 50, 50) #hack, set off image size
         
     def update(self):
         self.rect.center = (self.x, self.y)
@@ -35,15 +35,17 @@ def run():
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     
-    car = Vehicle('images/car.png')
-    car.x = screen.get_width() / 2
-    car.y = screen.get_height() / 2
-    carGroup = pygame.sprite.RenderPlain(car)
+    carimage = pygame.image.load('images/car.png')
+    carGroup = pygame.sprite.RenderUpdates()
+    car = None
+        #car = Vehicle(carimage)
+        #car.x = screen.get_width() / 2
+        #car.y = screen.get_height() / 2
     
-    player = Vehicle('images/player.png')
+    player = Player('images/player.png')
     player.x = screen.get_width() / 4
     player.y = screen.get_height() / 4
-    playerGroup = pygame.sprite.RenderPlain(player)
+    playerGroup = pygame.sprite.RenderUpdates(player)
     
     pygame.mixer.init()
     splat = pygame.mixer.Sound("sound/splat.ogg")
@@ -76,8 +78,15 @@ def run():
             player.y += 1
                 
         #sim
-        car.x += random.randint(-1, 1)
-        car.y += random.randint(-1, 1)
+        if car is None:
+            car = Vehicle(carimage)
+            carGroup.add(car)
+            
+        car.x += random.randint(2, 10)
+        car.y += random.randint(2, 10)
+        
+        if car.x > (screen.get_width() + car.rect.width + car.rect.height):
+            car = None
 
         carGroup.update()
         playerGroup.update()
