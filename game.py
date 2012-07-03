@@ -2,28 +2,42 @@
 
 import pygame
 import random
+import euclid
 
 class Vehicle(pygame.sprite.DirtySprite):
     def __init__(self, image):
         super(Vehicle, self).__init__()
         self.image = image
-        self.x = 0
-        self.y = 0
+        self.position = euclid.Vector2(0, 0)
+        self.velocity = euclid.Vector2(0, 0)
         self.rect = pygame.Rect(0, 0, 50, 50) #hack, set off image size
         
     def update(self):
-        self.rect.center = (self.x, self.y)
+        self.position += self.velocity #need to include time elapsed here or the speed will depend on frame rate
+        self.rect.center = self.position
         
 class Player(pygame.sprite.DirtySprite):
     def __init__(self, image):
         super(Player, self).__init__()
         self.image = pygame.image.load(image)
-        self.x = 0
-        self.y = 0
+        self.position = euclid.Vector2(0, 0)
         self.rect = pygame.Rect(0, 0, 50, 50)
         
     def update(self):
-        self.rect.center = (self.x, self.y)
+        self.rect.center = self.position
+        
+def offscreen(sprite, screen):
+    if sprite.position.x < -sprite.rect.width:
+        return True
+        
+    if sprite.position.y < -sprite.rect.height:
+        return True
+        
+    if sprite.position.x > screen.get_width() + sprite.rect.width:
+        return True
+        
+    if sprite.position.y > screen.get_height() + sprite.rect.height:
+        return True
 
 def run():
     #constants
@@ -38,13 +52,9 @@ def run():
     carimage = pygame.image.load('images/car.png')
     carGroup = pygame.sprite.RenderUpdates()
     car = None
-        #car = Vehicle(carimage)
-        #car.x = screen.get_width() / 2
-        #car.y = screen.get_height() / 2
     
     player = Player('images/player.png')
-    player.x = screen.get_width() / 4
-    player.y = screen.get_height() / 4
+    player.position = euclid.Vector2(screen.get_width() / 4, screen.get_height() / 4)
     playerGroup = pygame.sprite.RenderUpdates(player)
     
     pygame.mixer.init()
@@ -66,26 +76,27 @@ def run():
         
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_a]:
-            player.x -= 1
+            player.position.x -= 1
             
         if pressed[pygame.K_d]:
-            player.x += 1
+            player.position.x += 1
             
         if pressed[pygame.K_w]:
-            player.y -= 1
+            player.position.y -= 1
             
         if pressed[pygame.K_s]:
-            player.y += 1
+            player.position.y += 1
                 
         #sim
         if car is None:
             car = Vehicle(carimage)
+            car.velocity = euclid.Vector2(10, 10)
             carGroup.add(car)
             
-        car.x += random.randint(2, 10)
-        car.y += random.randint(2, 10)
+        #import pdb; pdb.set_trace()
+        car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
         
-        if car.x > (screen.get_width() + car.rect.width + car.rect.height):
+        if offscreen(car, screen):
             car = None
 
         carGroup.update()
