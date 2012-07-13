@@ -89,11 +89,11 @@ def run():
     car = None
     
     player = Player('images/player.png')
-    player.position = euclid.Vector2(screen.get_width() / 4 + 20, screen.get_height() / 4 + 20)
+    player.position = euclid.Vector2(screen.get_width() / 2 + 20, screen.get_height() / 2 + 20)
     playerGroup = pygame.sprite.RenderUpdates(player)
     
     person = Person('images/person.png', 'images/deadperson.png', splat)
-    person.position = euclid.Vector2(screen.get_width() / 4, screen.get_height() / 4)
+    person.position = euclid.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     personGroup = pygame.sprite.RenderUpdates(person)
     
     bail = False
@@ -131,7 +131,8 @@ def run():
         #sim
         if car is None:
             car = Vehicle(carimage)
-            car.velocity = euclid.Vector2(3, 3)
+            car.velocity = euclid.Vector2(3, 0)
+            car.position = euclid.Vector2(0, screen.get_height() / 2)
             carGroup.add(car)
             
         #car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
