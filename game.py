@@ -16,15 +16,26 @@ class Vehicle(pygame.sprite.DirtySprite):
         self.position += self.velocity #need to include time elapsed here or the speed will depend on frame rate
         self.rect.center = self.position
         
+        
 class Player(pygame.sprite.DirtySprite):
     def __init__(self, image):
         super(Player, self).__init__()
         self.image = pygame.image.load(image)
         self.position = euclid.Vector2(0, 0)
         self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        self.host = None
         
     def update(self):
         self.rect.center = self.position
+        
+        if(self.host is not None):
+            self.host.position = euclid.Vector2(self.position.x, self.position.y)
+        
+    def possess(self, person):
+        self.host = person
+        
+    def dispossess(self):
+        self.host = None
         
 class Person(pygame.sprite.DirtySprite):
     def __init__(self, image):
@@ -65,17 +76,18 @@ def run():
     car = None
     
     player = Player('images/player.png')
-    player.position = euclid.Vector2(screen.get_width() / 4, screen.get_height() / 4)
+    player.position = euclid.Vector2(screen.get_width() / 4 + 20, screen.get_height() / 4 + 20)
     playerGroup = pygame.sprite.RenderUpdates(player)
     
     person = Person('images/person.png')
-    person.position = euclid.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+    person.position = euclid.Vector2(screen.get_width() / 4, screen.get_height() / 4)
     personGroup = pygame.sprite.RenderUpdates(person)
     
     pygame.mixer.init()
     splat = pygame.mixer.Sound("sound/splat.ogg")
     
     bail = False
+    possessToggle = False
     while not bail:
         deltat = clock.tick(60)
         
@@ -85,6 +97,11 @@ def run():
                 if event.key == pygame.K_ESCAPE:
                     bail = True
                     break
+                elif event.key == pygame.K_SPACE:
+                    possessToggle = True
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    possessToggle = False
                 
         pygame.event.clear()
         
@@ -104,10 +121,10 @@ def run():
         #sim
         if car is None:
             car = Vehicle(carimage)
-            car.velocity = euclid.Vector2(10, 10)
+            car.velocity = euclid.Vector2(3, 3)
             carGroup.add(car)
             
-        car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
+        #car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
         
         if offscreen(car, screen):
             car = None
@@ -121,6 +138,19 @@ def run():
                 print("hit")
                 splat.play()
                 person.dead = True
+            
+            if possessToggle:
+                if player.host is None:
+                    collisions = pygame.sprite.spritecollide(player, personGroup, False)
+                    #todo multiple people
+                    if len(collisions) > 0:
+                        player.possess(person)
+                    else:
+                        pass
+                else:
+                    player.dispossess()
+                    
+                possessToggle = False    
         
         #render
         screen.fill((0,0,0))
