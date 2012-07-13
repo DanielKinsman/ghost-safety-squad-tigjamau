@@ -10,7 +10,7 @@ class Vehicle(pygame.sprite.DirtySprite):
         self.image = image
         self.position = euclid.Vector2(0, 0)
         self.velocity = euclid.Vector2(0, 0)
-        self.rect = pygame.Rect(0, 0, 50, 50) #hack, set off image size
+        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
         
     def update(self):
         self.position += self.velocity #need to include time elapsed here or the speed will depend on frame rate
@@ -21,7 +21,18 @@ class Player(pygame.sprite.DirtySprite):
         super(Player, self).__init__()
         self.image = pygame.image.load(image)
         self.position = euclid.Vector2(0, 0)
-        self.rect = pygame.Rect(0, 0, 50, 50)
+        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        
+    def update(self):
+        self.rect.center = self.position
+        
+class Person(pygame.sprite.DirtySprite):
+    def __init__(self, image):
+        super(Person, self).__init__()
+        self.image = pygame.image.load(image)
+        self.position = euclid.Vector2(0, 0)
+        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        self.dead = False
         
     def update(self):
         self.rect.center = self.position
@@ -57,10 +68,13 @@ def run():
     player.position = euclid.Vector2(screen.get_width() / 4, screen.get_height() / 4)
     playerGroup = pygame.sprite.RenderUpdates(player)
     
+    person = Person('images/person.png')
+    person.position = euclid.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+    personGroup = pygame.sprite.RenderUpdates(person)
+    
     pygame.mixer.init()
     splat = pygame.mixer.Sound("sound/splat.ogg")
     
-    dead = False
     bail = False
     while not bail:
         deltat = clock.tick(60)
@@ -93,7 +107,6 @@ def run():
             car.velocity = euclid.Vector2(10, 10)
             carGroup.add(car)
             
-        #import pdb; pdb.set_trace()
         car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
         
         if offscreen(car, screen):
@@ -101,16 +114,19 @@ def run():
 
         carGroup.update()
         playerGroup.update()
-        if not dead:
-            collisions = pygame.sprite.spritecollide(player, carGroup, False)
+        personGroup.update()
+        if not person.dead:
+            collisions = pygame.sprite.spritecollide(person, carGroup, False)
             if len(collisions) > 0:
+                print("hit")
                 splat.play()
-                dead = True
+                person.dead = True
         
         #render
         screen.fill((0,0,0))
         carGroup.draw(screen)
         playerGroup.draw(screen)
+        personGroup.draw(screen)
         pygame.display.flip()
     
     pygame.display.quit()
