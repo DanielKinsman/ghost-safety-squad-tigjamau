@@ -49,8 +49,14 @@ class Person(pygame.sprite.DirtySprite):
         self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
         self.dead = False
         self.deathsound = deathsound
+        self.goal = None
+        self.speed = 1
         
     def update(self):
+        if (not self.dead) and (self.goal is not None):
+            velocity = (self.goal - self.position).normalize() * self.speed
+            self.position += velocity
+            
         self.rect.center = self.position
         
     def kill(self):
@@ -109,9 +115,16 @@ def run():
                     break
                 elif event.key == pygame.K_SPACE:
                     possessToggle = True
+                else:
+                    pass
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
                     possessToggle = False
+                else:
+                    pass
+            else:
+                pass
+            
                 
         pygame.event.clear()
         
@@ -144,10 +157,16 @@ def run():
         playerGroup.update()
         personGroup.update()
         if not person.dead:
+            if car is not None:
+                person.goal = car.position
+            else:
+                pass
+            
             collisions = pygame.sprite.spritecollide(person, carGroup, False)
             if len(collisions) > 0:
                 person.kill()
-                
+            else:
+                pass
             
             if possessToggle:
                 if player.host is None:
@@ -160,7 +179,9 @@ def run():
                 else:
                     player.dispossess()
                     
-                possessToggle = False    
+                possessToggle = False
+        else:
+            pass
         
         #render
         screen.fill((0,0,0))
