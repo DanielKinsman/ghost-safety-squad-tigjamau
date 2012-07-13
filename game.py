@@ -28,8 +28,11 @@ class Player(pygame.sprite.DirtySprite):
     def update(self):
         self.rect.center = self.position
         
-        if(self.host is not None):
-            self.host.position = euclid.Vector2(self.position.x, self.position.y)
+        if self.host is not None:
+            if self.host.dead:
+                self.dispossess()
+            else:
+                self.host.position = euclid.Vector2(self.position.x, self.position.y)
         
     def possess(self, person):
         self.host = person
@@ -38,15 +41,22 @@ class Player(pygame.sprite.DirtySprite):
         self.host = None
         
 class Person(pygame.sprite.DirtySprite):
-    def __init__(self, image):
+    def __init__(self, image, deadimage, deathsound):
         super(Person, self).__init__()
         self.image = pygame.image.load(image)
+        self.deadimage = pygame.image.load(deadimage)
         self.position = euclid.Vector2(0, 0)
         self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
         self.dead = False
+        self.deathsound = deathsound
         
     def update(self):
         self.rect.center = self.position
+        
+    def kill(self):
+        self.dead = True
+        self.deathsound.play()
+        self.image = self.deadimage
         
 def offscreen(sprite, screen):
     if sprite.position.x < -sprite.rect.width:
@@ -71,6 +81,9 @@ def run():
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     
+    pygame.mixer.init()
+    splat = pygame.mixer.Sound("sound/splat.ogg")
+    
     carimage = pygame.image.load('images/car.png')
     carGroup = pygame.sprite.RenderUpdates()
     car = None
@@ -79,12 +92,9 @@ def run():
     player.position = euclid.Vector2(screen.get_width() / 4 + 20, screen.get_height() / 4 + 20)
     playerGroup = pygame.sprite.RenderUpdates(player)
     
-    person = Person('images/person.png')
+    person = Person('images/person.png', 'images/deadperson.png', splat)
     person.position = euclid.Vector2(screen.get_width() / 4, screen.get_height() / 4)
     personGroup = pygame.sprite.RenderUpdates(person)
-    
-    pygame.mixer.init()
-    splat = pygame.mixer.Sound("sound/splat.ogg")
     
     bail = False
     possessToggle = False
@@ -135,9 +145,8 @@ def run():
         if not person.dead:
             collisions = pygame.sprite.spritecollide(person, carGroup, False)
             if len(collisions) > 0:
-                print("hit")
-                splat.play()
-                person.dead = True
+                person.kill()
+                
             
             if possessToggle:
                 if player.host is None:
