@@ -150,9 +150,9 @@ class Game(object):
             
             #render
             self.screen.blit(self.background, (0, 0))
+            self.personGroup.draw(self.screen)
             self.carGroup.draw(self.screen)
             self.playerGroup.draw(self.screen)
-            self.personGroup.draw(self.screen)
             pygame.display.flip()
         
         #clean up before exit
