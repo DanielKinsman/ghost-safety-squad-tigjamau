@@ -5,13 +5,31 @@ import random
 import euclid
 import math
 
+class CrashPredictor(pygame.sprite.Sprite):
+    def __init__(self, vehicle):
+        super(CrashPredictor, self).__init__()
+        self.vehicle = vehicle
+        self.image = pygame.image.load('images/collider.png')
+        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        
+    def update(self):
+        xOff = (self.vehicle.image.get_width() / 2) + (self.image.get_width() / 2)
+        if self.vehicle.velocity.x > 0:
+            offset = euclid.Vector2(xOff, 0)
+        else:
+            offset = euclid.Vector2(-xOff, 0)
+            
+        self.rect.center = self.vehicle.position + offset
+
 class Vehicle(pygame.sprite.DirtySprite):
-    def __init__(self, image):
+    def __init__(self, image, maxVelocity):
         super(Vehicle, self).__init__()
         self.image = image
         self.position = euclid.Vector2(0, 0)
         self.velocity = euclid.Vector2(0, 0)
         self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        self.crashPredictor = CrashPredictor(self)
+        self.maxVelocity = maxVelocity
         
     def update(self):
         self.position += self.velocity #need to include time elapsed here or the speed will depend on frame rate
@@ -107,7 +125,7 @@ class Game(object):
     WIDTH = 1024
     HEIGHT = 768
     SPAWN_PEOPLE_BELOW = 1
-    SPAWN_CARS_BELOW = 8
+    SPAWN_CARS_BELOW = 4
     CAR_VELOCITY = 10
     TRUCK_VELOCITY = 6
     MOTORBIKE_VELOCITY = 15
@@ -126,6 +144,7 @@ class Game(object):
         self.truckimage = pygame.image.load('images/truck.png')
         self.motorbikeimage = pygame.image.load('images/motorbike.png')
         self.carGroup = pygame.sprite.RenderUpdates()
+        self.crashPredictGroup = pygame.sprite.RenderUpdates()
         
         self.carsSpawnDelay = Game.CAR_SPAWN_DELAY_AVERAGE
         self.carSpawnLast = 0
@@ -135,15 +154,6 @@ class Game(object):
         self.playerGroup = pygame.sprite.RenderUpdates(self.player)
         
         self.people = list()
-        
-        #person = Person('images/person.png', 'images/deadperson.png', self.splat)
-        #person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
-        #self.people.append(person)
-        
-        #person = Person('images/person.png', 'images/deadperson.png', splat)
-        #person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 4)
-        #self.people.append(person)
-        
         self.personGroup = pygame.sprite.RenderUpdates(self.people)
         
         self.possessToggle = False
@@ -170,6 +180,7 @@ class Game(object):
             self.carGroup.update()
             self.playerGroup.update()
             self.personGroup.update()
+            self.crashPredictGroup.update()
             
             self.runCars()
             self.runPeople()
@@ -179,10 +190,12 @@ class Game(object):
             self.personGroup.clear(self.screen, self.background)
             self.carGroup.clear(self.screen, self.background)
             self.playerGroup.clear(self.screen, self.background)
+            #self.crashPredictGroup.clear(self.screen, self.background) #debug only
             
             self.personGroup.draw(self.screen)
             self.carGroup.draw(self.screen)
             self.playerGroup.draw(self.screen)
+            #self.crashPredictGroup.draw(self.screen) #debug only
             pygame.display.flip()
         
         #clean up before exit
@@ -205,6 +218,21 @@ class Game(object):
         for car in self.carGroup.sprites():
             if offscreen(car, self.screen):
                 self.carGroup.remove(car)
+                
+            #slow down if there's an obstacle ahead
+            collisions = pygame.sprite.spritecollide(car.crashPredictor, self.carGroup, False)
+            # greater than one because the crash predictor is going to collide with the car
+            # it is attached to
+            if len(collisions) > 0 and ((collisions[0] is not car) or (len(collisions) > 1)):
+                car.velocity.x *= 0.9
+            elif car.velocity.magnitude() < car.maxVelocity:
+                car.velocity.x *= 1.1
+                
+                #if the car stops, give it a little push. This is a bit hackish, eh?
+                if car.velocity.magnitude() < 1:
+                    car.velocity.x = -1 if car.position.y > self.screen.get_height() / 2 else 1
+                
+                
             
     def runPlayer(self):
         if self.possessToggle:
@@ -260,25 +288,22 @@ class Game(object):
             #car or truck?
             vehicleType = random.choice(['car', 'truck', 'motorbike'])
             if vehicleType == 'car':
-                wheels = Vehicle(self.carimage)
-                topVelocity = Game.CAR_VELOCITY
+                wheels = Vehicle(self.carimage, Game.CAR_VELOCITY)
             elif vehicleType == 'truck':
-                wheels = Vehicle(self.truckimage)
-                topVelocity = Game.TRUCK_VELOCITY
+                wheels = Vehicle(self.truckimage, Game.TRUCK_VELOCITY)
             else:
-                wheels = Vehicle(self.motorbikeimage)
-                topVelocity = Game.MOTORBIKE_VELOCITY
+                wheels = Vehicle(self.motorbikeimage, Game.MOTORBIKE_VELOCITY)
             
             #pick a random side (left or right)
             x = random.choice([-100, self.screen.get_width() + 100])
             y = self.screen.get_height() / 2
             
             if x <= 0:
-                xVelocity = topVelocity
-                y += 200
-            else:
-                xVelocity = -topVelocity
+                xVelocity = wheels.maxVelocity
                 y += -200
+            else:
+                xVelocity = -wheels.maxVelocity
+                y += 200
                 wheels.image = pygame.transform.flip(wheels.image, True, False)
             
             wheels.velocity = euclid.Vector2(xVelocity, 0)
@@ -289,6 +314,10 @@ class Game(object):
             collisions = pygame.sprite.spritecollide(wheels, self.carGroup, False)
             if len(collisions) == 0:
                 self.carGroup.add(wheels)
+                self.crashPredictGroup.add(wheels.crashPredictor)
+            else:
+                wheels.crashPredictor.vehicle = None
+                wheels.crashPredictor = None
         
     def processInput(self):
         for event in pygame.event.get():
