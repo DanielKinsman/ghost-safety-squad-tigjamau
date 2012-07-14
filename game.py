@@ -122,7 +122,7 @@ class Game(object):
         self.bail = False
         while not self.bail:
             elapsed = clock.tick(60)
-            if elapsed > 16:
+            if elapsed > 32:
                 print("frametime:%(elapsed)03d" % {'elapsed': elapsed})
             
             #input
