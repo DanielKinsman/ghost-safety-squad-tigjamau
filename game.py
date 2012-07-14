@@ -250,9 +250,15 @@ class Game(object):
             
             #pick a random side (left or right)
             x = random.choice([-100, self.screen.get_width() + 100])
-            xVelocity = topVelocity if x <= 0 else -topVelocity
             y = self.screen.get_height() / 2
-            y += 200 if x <= 0 else -200
+            
+            if x <= 0:
+                xVelocity = topVelocity
+                y += 200
+            else:
+                xVelocity = -topVelocity
+                y += -200
+                wheels.image = pygame.transform.flip(wheels.image, True, False)
             
             wheels.velocity = euclid.Vector2(xVelocity, 0)
             wheels.position = euclid.Vector2(x, y)
