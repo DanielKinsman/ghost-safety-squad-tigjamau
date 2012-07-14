@@ -87,9 +87,12 @@ class Game(object):
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT))
+        #self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT), pygame.FULLSCREEN | pygame.DOUBLEBUF | pygame.HWSURFACE)
         
         pygame.mixer.init()
         self.splat = pygame.mixer.Sound("sound/splat.ogg")
+        
+        self.background = pygame.image.load("images/background.png")
         
         self.carimage = pygame.image.load('images/car.png')
         self.carGroup = pygame.sprite.RenderUpdates()
@@ -118,7 +121,9 @@ class Game(object):
         self.possessToggle = False
         self.bail = False
         while not self.bail:
-            deltat = clock.tick(60)
+            elapsed = clock.tick(60)
+            if elapsed > 16:
+                print("frametime:%(elapsed)03d" % {'elapsed': elapsed})
             
             #input
             self.processInput()
@@ -136,7 +141,7 @@ class Game(object):
             self.spawnCars()
             
             #render
-            self.screen.fill((0,0,0))
+            self.screen.blit(self.background, (0, 0))
             self.carGroup.draw(self.screen)
             self.playerGroup.draw(self.screen)
             self.personGroup.draw(self.screen)
