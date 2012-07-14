@@ -85,8 +85,9 @@ class Game(object):
     #constants
     WIDTH = 1024
     HEIGHT = 768
-    SPAWN_PEOPLE_BELOW = 4
-    SPAWN_CARS_BELOW = 2
+    SPAWN_PEOPLE_BELOW = 2
+    SPAWN_CARS_BELOW = 8
+    CAR_VELOCITY = 10
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT))
@@ -214,15 +215,22 @@ class Game(object):
         
     def spawnCars(self):
         if len(self.carGroup.sprites()) < Game.SPAWN_CARS_BELOW:
-            car = Vehicle(self.carimage)
+            
             #pick a random side (left or right)
-            x = random.choice([0, self.screen.get_width()])
-            xVelocity = 3 if x == 0 else -3
+            x = random.choice([-100, self.screen.get_width() + 100])
+            xVelocity = Game.CAR_VELOCITY if x <= 0 else -Game.CAR_VELOCITY
             y = self.screen.get_height() / 2
-            y += 20 if x == 0 else -20
+            y += 20 if x <= 0 else -20
+            
+            car = Vehicle(self.carimage)
             car.velocity = euclid.Vector2(xVelocity, 0)
             car.position = euclid.Vector2(x, y)
-            self.carGroup.add(car)
+            car.update()
+            
+            #see if there is another (non-dead) sprite occupying the space, if so, do nothing
+            collisions = pygame.sprite.spritecollide(car, self.carGroup, False)
+            if len(collisions) == 0:
+                self.carGroup.add(car)
         
     def processInput(self):
         for event in pygame.event.get():
