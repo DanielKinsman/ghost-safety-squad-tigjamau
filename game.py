@@ -82,13 +82,13 @@ class Game(object):
     #constants
     WIDTH = 1024
     HEIGHT = 768
+    SPAWN_PEOPLE_BELOW = 4
         
     def __init__(self):
-        self.randy = random.Random()
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT))
         
         pygame.mixer.init()
-        splat = pygame.mixer.Sound("sound/splat.ogg")
+        self.splat = pygame.mixer.Sound("sound/splat.ogg")
         
         self.carimage = pygame.image.load('images/car.png')
         self.carGroup = pygame.sprite.RenderUpdates()
@@ -100,13 +100,13 @@ class Game(object):
         
         self.people = list()
         
-        person = Person('images/person.png', 'images/deadperson.png', splat)
-        person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
-        self.people.append(person)
+        #person = Person('images/person.png', 'images/deadperson.png', self.splat)
+        #person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
+        #self.people.append(person)
         
-        person = Person('images/person.png', 'images/deadperson.png', splat)
-        person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 4)
-        self.people.append(person)
+        #person = Person('images/person.png', 'images/deadperson.png', splat)
+        #person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 4)
+        #self.people.append(person)
         
         self.personGroup = pygame.sprite.RenderUpdates(self.people)
         
@@ -132,6 +132,8 @@ class Game(object):
             self.runPeople()
             self.runPlayer()
             
+            self.spawnPeople()
+            
             #render
             self.screen.fill((0,0,0))
             self.carGroup.draw(self.screen)
@@ -139,6 +141,7 @@ class Game(object):
             self.personGroup.draw(self.screen)
             pygame.display.flip()
         
+        #clean up before exit
         pygame.display.quit()
         pygame.mixer.quit()
         
@@ -184,6 +187,31 @@ class Game(object):
             self.possessToggle = False
         else:
             pass
+        
+    def spawnPeople(self):
+        aliveCount = 0
+        for person in self.people:
+            if not person.dead:
+                aliveCount += 1
+            else:
+                pass
+            
+        if aliveCount < Game.SPAWN_PEOPLE_BELOW:
+            self.spawnPerson()
+            
+    def spawnPerson(self):
+        #randomly choose top or bottom for y
+        y = random.choice([0, self.screen.get_height()])
+        
+        #pick random x value
+        x = random.randint(10, self.screen.get_width() - 10)
+        
+        #spawn person a x y
+        person = Person('images/person.png', 'images/deadperson.png', self.splat)
+        person.position = euclid.Vector2(x, y)
+        self.people.append(person)
+        self.personGroup.add(person)
+        
         
     def processInput(self):
         for event in pygame.event.get():
