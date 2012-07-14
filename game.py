@@ -98,9 +98,17 @@ def run():
     player.position = euclid.Vector2(screen.get_width() / 2 + 20, screen.get_height() / 2 + 20)
     playerGroup = pygame.sprite.RenderUpdates(player)
     
+    people = list()
+    
     person = Person('images/person.png', 'images/deadperson.png', splat)
     person.position = euclid.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-    personGroup = pygame.sprite.RenderUpdates(person)
+    people.append(person)
+    
+    person = Person('images/person.png', 'images/deadperson.png', splat)
+    person.position = euclid.Vector2(screen.get_width() / 2, screen.get_height() / 4)
+    people.append(person)
+    
+    personGroup = pygame.sprite.RenderUpdates(people)
     
     bail = False
     possessToggle = False
@@ -156,30 +164,36 @@ def run():
         carGroup.update()
         playerGroup.update()
         personGroup.update()
-        if not person.dead:
-            if car is not None:
-                person.goal = car.position
-            else:
-                pass
-            
-            collisions = pygame.sprite.spritecollide(person, carGroup, False)
-            if len(collisions) > 0:
-                person.kill()
-            else:
-                pass
-            
-            if possessToggle:
-                if player.host is None:
-                    collisions = pygame.sprite.spritecollide(player, personGroup, False)
-                    #todo multiple people
-                    if len(collisions) > 0:
-                        player.possess(person)
-                    else:
-                        pass
+        
+        person = None
+        for person in people:
+            if not person.dead:
+                if car is not None:
+                    person.goal = car.position
                 else:
-                    player.dispossess()
-                    
-                possessToggle = False
+                    pass
+                
+                collisions = pygame.sprite.spritecollide(person, carGroup, False)
+                if len(collisions) > 0:
+                    person.kill()
+                else:
+                    pass
+            else:
+                pass
+            
+        person = None
+                
+        if possessToggle:
+            if player.host is None:
+                collisions = pygame.sprite.spritecollide(player, personGroup, False)
+                if len(collisions) > 0:
+                    player.possess(collisions[0])
+                else:
+                    pass
+            else:
+                player.dispossess()
+                
+            possessToggle = False
         else:
             pass
         
