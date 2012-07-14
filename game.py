@@ -83,6 +83,7 @@ class Game(object):
     WIDTH = 1024
     HEIGHT = 768
     SPAWN_PEOPLE_BELOW = 4
+    SPAWN_CARS_BELOW = 2
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT))
@@ -92,7 +93,6 @@ class Game(object):
         
         self.carimage = pygame.image.load('images/car.png')
         self.carGroup = pygame.sprite.RenderUpdates()
-        self.car = None
         
         self.player = Player('images/player.png')
         self.player.position = euclid.Vector2(self.screen.get_width() / 2 + 20, self.screen.get_height() / 2 + 20)
@@ -133,6 +133,7 @@ class Game(object):
             self.runPlayer()
             
             self.spawnPeople()
+            self.spawnCars()
             
             #render
             self.screen.fill((0,0,0))
@@ -148,30 +149,19 @@ class Game(object):
     def runPeople(self):
         for person in self.people:
             if not person.dead:
-                if self.car is not None:
-                    person.goal = self.car.position
-                else:
-                    pass
-                
                 collisions = pygame.sprite.spritecollide(person, self.carGroup, False)
                 if len(collisions) > 0:
                     person.kill()
-                else:
-                    pass
+                elif offscreen(person, self.screen):
+                    self.personGroup.remove(person)
+                    self.people.remove(person)
             else:
                 pass
             
     def runCars(self):
-        if self.car is None:
-            self.car = Vehicle(self.carimage)
-            self.car.velocity = euclid.Vector2(3, 0)
-            self.car.position = euclid.Vector2(0, self.screen.get_height() / 2)
-            self.carGroup.add(self.car)
-            
-        #self.car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
-        
-        if offscreen(self.car, self.screen):
-            self.car = None
+        for car in self.carGroup.sprites():
+            if offscreen(car, self.screen):
+                self.carGroup.remove(car)
             
     def runPlayer(self):
         if self.possessToggle:
@@ -202,6 +192,7 @@ class Game(object):
     def spawnPerson(self):
         #randomly choose top or bottom for y
         y = random.choice([0, self.screen.get_height()])
+        goalY = self.screen.get_height() + 100 if y == 0 else -100
         
         #pick random x value
         x = random.randint(10, self.screen.get_width() - 10)
@@ -209,9 +200,21 @@ class Game(object):
         #spawn person a x y
         person = Person('images/person.png', 'images/deadperson.png', self.splat)
         person.position = euclid.Vector2(x, y)
+        person.goal = euclid.Vector2(x, goalY)
         self.people.append(person)
         self.personGroup.add(person)
         
+    def spawnCars(self):
+        if len(self.carGroup.sprites()) < Game.SPAWN_CARS_BELOW:
+            car = Vehicle(self.carimage)
+            #pick a random side (left or right)
+            x = random.choice([0, self.screen.get_width()])
+            xVelocity = 3 if x == 0 else -3
+            y = self.screen.get_height() / 2
+            y += 20 if x == 0 else -20
+            car.velocity = euclid.Vector2(xVelocity, 0)
+            car.position = euclid.Vector2(x, y)
+            self.carGroup.add(car)
         
     def processInput(self):
         for event in pygame.event.get():
