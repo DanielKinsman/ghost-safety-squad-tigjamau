@@ -77,135 +77,138 @@ def offscreen(sprite, screen):
     if sprite.position.y > screen.get_height() + sprite.rect.height:
         return True
 
-def run():
+        
+class Game(object):
     #constants
     WIDTH = 1024
     HEIGHT = 768
-    
-    #init
-    randy = random.Random()
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    
-    pygame.mixer.init()
-    splat = pygame.mixer.Sound("sound/splat.ogg")
-    
-    carimage = pygame.image.load('images/car.png')
-    carGroup = pygame.sprite.RenderUpdates()
-    car = None
-    
-    player = Player('images/player.png')
-    player.position = euclid.Vector2(screen.get_width() / 2 + 20, screen.get_height() / 2 + 20)
-    playerGroup = pygame.sprite.RenderUpdates(player)
-    
-    people = list()
-    
-    person = Person('images/person.png', 'images/deadperson.png', splat)
-    person.position = euclid.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-    people.append(person)
-    
-    person = Person('images/person.png', 'images/deadperson.png', splat)
-    person.position = euclid.Vector2(screen.get_width() / 2, screen.get_height() / 4)
-    people.append(person)
-    
-    personGroup = pygame.sprite.RenderUpdates(people)
-    
-    bail = False
-    possessToggle = False
-    while not bail:
-        deltat = clock.tick(60)
         
-        #input
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    bail = True
-                    break
-                elif event.key == pygame.K_SPACE:
-                    possessToggle = True
+    def __init__(self):
+        self.randy = random.Random()
+        self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT))
+        
+        pygame.mixer.init()
+        splat = pygame.mixer.Sound("sound/splat.ogg")
+        
+        self.carimage = pygame.image.load('images/car.png')
+        self.carGroup = pygame.sprite.RenderUpdates()
+        self.car = None
+        
+        self.player = Player('images/player.png')
+        self.player.position = euclid.Vector2(self.screen.get_width() / 2 + 20, self.screen.get_height() / 2 + 20)
+        self.playerGroup = pygame.sprite.RenderUpdates(self.player)
+        
+        self.people = list()
+        
+        person = Person('images/person.png', 'images/deadperson.png', splat)
+        person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
+        self.people.append(person)
+        
+        person = Person('images/person.png', 'images/deadperson.png', splat)
+        person.position = euclid.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 4)
+        self.people.append(person)
+        
+        self.personGroup = pygame.sprite.RenderUpdates(self.people)
+        
+        self.possessToggle = False
+    
+    def run(self):
+        clock = pygame.time.Clock()
+        self.possessToggle = False
+        bail = False
+        while not bail:
+            deltat = clock.tick(60)
+            
+            #input
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        bail = True
+                        break
+                    elif event.key == pygame.K_SPACE:
+                        self.possessToggle = True
+                    else:
+                        pass
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_SPACE:
+                        self.possessToggle = False
+                    else:
+                        pass
                 else:
                     pass
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:
-                    possessToggle = False
-                else:
-                    pass
-            else:
-                pass
-            
                 
-        pygame.event.clear()
-        
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_a]:
-            player.position.x -= 1
+                    
+            pygame.event.clear()
             
-        if pressed[pygame.K_d]:
-            player.position.x += 1
-            
-        if pressed[pygame.K_w]:
-            player.position.y -= 1
-            
-        if pressed[pygame.K_s]:
-            player.position.y += 1
+            pressed = pygame.key.get_pressed()
+            if pressed[pygame.K_a]:
+                self.player.position.x -= 1
                 
-        #sim
-        if car is None:
-            car = Vehicle(carimage)
-            car.velocity = euclid.Vector2(3, 0)
-            car.position = euclid.Vector2(0, screen.get_height() / 2)
-            carGroup.add(car)
+            if pressed[pygame.K_d]:
+                self.player.position.x += 1
+                
+            if pressed[pygame.K_w]:
+                self.player.position.y -= 1
+                
+            if pressed[pygame.K_s]:
+                self.player.position.y += 1
+                    
+            #sim
+            if self.car is None:
+                self.car = Vehicle(self.carimage)
+                self.car.velocity = euclid.Vector2(3, 0)
+                self.car.position = euclid.Vector2(0, self.screen.get_height() / 2)
+                self.carGroup.add(self.car)
+                
+            #self.car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
             
-        #car.velocity += (random.randint(-1, 1), random.randint(-1, 1))
-        
-        if offscreen(car, screen):
-            car = None
+            if offscreen(self.car, self.screen):
+                self.car = None
 
-        carGroup.update()
-        playerGroup.update()
-        personGroup.update()
-        
-        person = None
-        for person in people:
-            if not person.dead:
-                if car is not None:
-                    person.goal = car.position
+            self.carGroup.update()
+            self.playerGroup.update()
+            self.personGroup.update()
+            
+            for person in self.people:
+                if not person.dead:
+                    if self.car is not None:
+                        person.goal = self.car.position
+                    else:
+                        pass
+                    
+                    collisions = pygame.sprite.spritecollide(person, self.carGroup, False)
+                    if len(collisions) > 0:
+                        person.kill()
+                    else:
+                        pass
                 else:
                     pass
                 
-                collisions = pygame.sprite.spritecollide(person, carGroup, False)
-                if len(collisions) > 0:
-                    person.kill()
+            person = None
+                    
+            if self.possessToggle:
+                if self.player.host is None:
+                    collisions = pygame.sprite.spritecollide(self.player, self.personGroup, False)
+                    if len(collisions) > 0:
+                        self.player.possess(collisions[0])
+                    else:
+                        pass
                 else:
-                    pass
+                    self.player.dispossess()
+                    
+                self.possessToggle = False
             else:
                 pass
             
-        person = None
-                
-        if possessToggle:
-            if player.host is None:
-                collisions = pygame.sprite.spritecollide(player, personGroup, False)
-                if len(collisions) > 0:
-                    player.possess(collisions[0])
-                else:
-                    pass
-            else:
-                player.dispossess()
-                
-            possessToggle = False
-        else:
-            pass
+            #render
+            self.screen.fill((0,0,0))
+            self.carGroup.draw(self.screen)
+            self.playerGroup.draw(self.screen)
+            self.personGroup.draw(self.screen)
+            pygame.display.flip()
         
-        #render
-        screen.fill((0,0,0))
-        carGroup.draw(screen)
-        playerGroup.draw(screen)
-        personGroup.draw(screen)
-        pygame.display.flip()
-    
-    pygame.display.quit()
-    pygame.mixer.quit()
+        pygame.display.quit()
+        pygame.mixer.quit()
 
 if __name__ == '__main__':
-    run()
+    Game().run()
