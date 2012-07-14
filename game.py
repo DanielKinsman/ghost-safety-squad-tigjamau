@@ -3,6 +3,7 @@
 import pygame
 import random
 import euclid
+import math
 
 class Vehicle(pygame.sprite.DirtySprite):
     def __init__(self, image):
@@ -46,20 +47,30 @@ class Player(pygame.sprite.DirtySprite):
 class Person(pygame.sprite.DirtySprite):
     def __init__(self, image, deadimage, deathsound):
         super(Person, self).__init__()
-        self.image = pygame.image.load(image)
+        self.baseimage = pygame.image.load(image)
+        self.image = None
         self.deadimage = pygame.image.load(deadimage)
         self.position = euclid.Vector2(0, 0)
-        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        self.rect = pygame.Rect(0, 0, self.baseimage.get_width(), self.baseimage.get_height())
         self.dead = False
         self.deathsound = deathsound
         self.goal = None
         self.speed = 1
+        self.currentDirection = euclid.Vector2(0, 1)
         
     def update(self):
         if (not self.dead) and (self.goal is not None):
-            velocity = (self.goal - self.position).normalize() * self.speed
+            self.currentDirection = (self.goal - self.position).normalize()
+            velocity = self.currentDirection * self.speed
             self.position += velocity
+        
+        angle = math.degrees(self.currentDirection.angle(euclid.Vector2(0, 1)))
+        
+        # bit of a hack
+        if self.currentDirection.x < 0:
+            angle = -angle
             
+        self.image = pygame.transform.rotate(self.baseimage, angle)
         self.rect.center = self.position
         
     def kill(self):
@@ -79,13 +90,23 @@ def offscreen(sprite, screen):
         
     if sprite.position.y > screen.get_height() + sprite.rect.height:
         return True
+        
+def vectorApproximatelyEqual(a, b, min_delta):
+    if abs(a.x - b.x) >= min_delta:
+        return False
+        
+    if abs(a.y - b.y) >= min_delta:
+        return False
+        
+    return True
 
         
 class Game(object):
     #constants
+    VECTOR_COMPARE_MIN_DELTA = 0.0001
     WIDTH = 1024
     HEIGHT = 768
-    SPAWN_PEOPLE_BELOW = 2
+    SPAWN_PEOPLE_BELOW = 1
     SPAWN_CARS_BELOW = 8
     CAR_VELOCITY = 10
     TRUCK_VELOCITY = 6
@@ -143,6 +164,9 @@ class Game(object):
             self.processInput()
                     
             #sim
+            self.spawnPeople()
+            self.spawnCars()
+            
             self.carGroup.update()
             self.playerGroup.update()
             self.personGroup.update()
@@ -150,9 +174,6 @@ class Game(object):
             self.runCars()
             self.runPeople()
             self.runPlayer()
-            
-            self.spawnPeople()
-            self.spawnCars()
             
             #render
             self.personGroup.clear(self.screen, self.background)
