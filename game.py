@@ -63,9 +63,11 @@ class Player(pygame.sprite.DirtySprite):
         self.host = None
         
 class Person(pygame.sprite.DirtySprite):
-    def __init__(self, image, deadimage, deathsound):
+    def __init__(self, image, stepLeftImage, stepRightImage, deadimage, deathsound):
         super(Person, self).__init__()
         self.baseimage = pygame.image.load(image)
+        self.baseImageStepLeft = pygame.image.load(stepLeftImage)
+        self.baseImageStepRight = pygame.image.load(stepRightImage)
         self.image = None
         self.deadimage = pygame.image.load(deadimage)
         self.position = euclid.Vector2(0, 0)
@@ -75,6 +77,8 @@ class Person(pygame.sprite.DirtySprite):
         self.goal = None
         self.speed = 1
         self.currentDirection = euclid.Vector2(0, 1)
+        self.animationFrameCount = 0
+        self.currentBaseImage = self.baseimage
         
     def update(self):
         if (not self.dead) and (self.goal is not None):
@@ -87,8 +91,17 @@ class Person(pygame.sprite.DirtySprite):
             # bit of a hack
             if self.currentDirection.x < 0:
                 angle = -angle
-                
-            self.image = pygame.transform.rotate(self.baseimage, angle)
+            
+            #frame = random.choice([self.baseimage, self.baseImageStepLeft, self.baseImageStepRight])
+            self.animationFrameCount += 1
+            if self.animationFrameCount % 30 == 0:
+                self.animationFrameCount = 0
+                if self.currentBaseImage is self.baseImageStepLeft:
+                    self.currentBaseImage = self.baseImageStepRight
+                else:
+                    self.currentBaseImage = self.baseImageStepLeft
+            
+            self.image = pygame.transform.rotate(self.currentBaseImage, angle)
             self.rect.center = self.position
         
     def kill(self):
@@ -269,7 +282,7 @@ class Game(object):
         x = random.randint(10, self.screen.get_width() - 10)
         
         #spawn person a x y
-        person = Person('images/person.png', 'images/deadperson.png', self.splat)
+        person = Person('images/person.png', 'images/personstepleft.png', 'images/personstepright.png', 'images/deadperson.png', self.splat)
         person.position = euclid.Vector2(x, y)
         person.goal = euclid.Vector2(x, goalY)
         self.people.append(person)
