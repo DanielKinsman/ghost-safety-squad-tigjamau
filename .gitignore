@@ -1,4 +1,5 @@
 *.pyc
-images/art
 .dropbox
 *.kate-swp
+images/art
+sound/raw
