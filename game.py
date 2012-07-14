@@ -88,6 +88,7 @@ class Game(object):
     SPAWN_PEOPLE_BELOW = 2
     SPAWN_CARS_BELOW = 8
     CAR_VELOCITY = 10
+    TRUCK_VELOCITY = 6
     CAR_SPAWN_DELAY_AVERAGE = 1500
         
     def __init__(self):
@@ -100,6 +101,7 @@ class Game(object):
         self.background = pygame.image.load("images/background.png")
         
         self.carimage = pygame.image.load('images/car.png')
+        self.truckimage = pygame.image.load('images/truck.png')
         self.carGroup = pygame.sprite.RenderUpdates()
         
         self.carsSpawnDelay = Game.CAR_SPAWN_DELAY_AVERAGE
@@ -227,22 +229,29 @@ class Game(object):
         self.carSpawnLast = now
         
         if len(self.carGroup.sprites()) < Game.SPAWN_CARS_BELOW:
+            #car or truck?
+            vehicleType = random.choice(['car', 'truck'])
+            if vehicleType == 'car':
+                wheels = Vehicle(self.carimage)
+                topVelocity = Game.CAR_VELOCITY
+            else:
+                wheels = Vehicle(self.truckimage)
+                topVelocity = Game.TRUCK_VELOCITY
             
             #pick a random side (left or right)
             x = random.choice([-100, self.screen.get_width() + 100])
-            xVelocity = Game.CAR_VELOCITY if x <= 0 else -Game.CAR_VELOCITY
+            xVelocity = topVelocity if x <= 0 else -topVelocity
             y = self.screen.get_height() / 2
             y += 20 if x <= 0 else -20
             
-            car = Vehicle(self.carimage)
-            car.velocity = euclid.Vector2(xVelocity, 0)
-            car.position = euclid.Vector2(x, y)
-            car.update()
+            wheels.velocity = euclid.Vector2(xVelocity, 0)
+            wheels.position = euclid.Vector2(x, y)
+            wheels.update()
             
             #see if there is another (non-dead) sprite occupying the space, if so, do nothing
-            collisions = pygame.sprite.spritecollide(car, self.carGroup, False)
+            collisions = pygame.sprite.spritecollide(wheels, self.carGroup, False)
             if len(collisions) == 0:
-                self.carGroup.add(car)
+                self.carGroup.add(wheels)
         
     def processInput(self):
         for event in pygame.event.get():
