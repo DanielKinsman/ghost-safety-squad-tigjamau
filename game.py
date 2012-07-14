@@ -88,6 +88,7 @@ class Game(object):
     SPAWN_PEOPLE_BELOW = 2
     SPAWN_CARS_BELOW = 8
     CAR_VELOCITY = 10
+    CAR_SPAWN_DELAY_AVERAGE = 1500
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT))
@@ -100,6 +101,9 @@ class Game(object):
         
         self.carimage = pygame.image.load('images/car.png')
         self.carGroup = pygame.sprite.RenderUpdates()
+        
+        self.carsSpawnDelay = Game.CAR_SPAWN_DELAY_AVERAGE
+        self.carSpawnLast = 0
         
         self.player = Player('images/player.png')
         self.player.position = euclid.Vector2(self.screen.get_width() / 2 + 20, self.screen.get_height() / 2 + 20)
@@ -214,6 +218,14 @@ class Game(object):
         self.personGroup.add(person)
         
     def spawnCars(self):
+        now = pygame.time.get_ticks()
+        elapsed = now - self.carSpawnLast
+        if elapsed < self.carsSpawnDelay:
+            return
+        
+        self.carsSpawnDelay = Game.CAR_SPAWN_DELAY_AVERAGE + random.randint(-500, +500)
+        self.carSpawnLast = now
+        
         if len(self.carGroup.sprites()) < Game.SPAWN_CARS_BELOW:
             
             #pick a random side (left or right)
