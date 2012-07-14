@@ -24,8 +24,11 @@ class Player(pygame.sprite.DirtySprite):
         self.position = euclid.Vector2(0, 0)
         self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
         self.host = None
+        self.direction = euclid.Vector2(0, 0)
+        self.speed = 5
         
     def update(self):
+        self.position += self.direction * self.speed
         self.rect.center = self.position
         
         if self.host is not None:
@@ -242,18 +245,20 @@ class Game(object):
                 
         pygame.event.clear()
         
+        self.player.direction = euclid.Vector2(0, 0)
+        
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_a]:
-            self.player.position.x -= 1
+            self.player.direction.x -= 1
             
         if pressed[pygame.K_d]:
-            self.player.position.x += 1
+            self.player.direction.x += 1
             
         if pressed[pygame.K_w]:
-            self.player.position.y -= 1
+            self.player.direction.y -= 1
             
         if pressed[pygame.K_s]:
-            self.player.position.y += 1
+            self.player.direction.y += 1
                 
 
 if __name__ == '__main__':
