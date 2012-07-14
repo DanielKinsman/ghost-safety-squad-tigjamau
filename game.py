@@ -64,14 +64,14 @@ class Person(pygame.sprite.DirtySprite):
             velocity = self.currentDirection * self.speed
             self.position += velocity
         
-        angle = math.degrees(self.currentDirection.angle(euclid.Vector2(0, 1)))
-        
-        # bit of a hack
-        if self.currentDirection.x < 0:
-            angle = -angle
+            angle = math.degrees(self.currentDirection.angle(euclid.Vector2(0, 1)))
             
-        self.image = pygame.transform.rotate(self.baseimage, angle)
-        self.rect.center = self.position
+            # bit of a hack
+            if self.currentDirection.x < 0:
+                angle = -angle
+                
+            self.image = pygame.transform.rotate(self.baseimage, angle)
+            self.rect.center = self.position
         
     def kill(self):
         self.dead = True
