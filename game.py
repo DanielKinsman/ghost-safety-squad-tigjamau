@@ -221,8 +221,8 @@ class Game(object):
                 
             #slow down if there's an obstacle ahead
             collisions = pygame.sprite.spritecollide(car.crashPredictor, self.carGroup, False)
-            # greater than one because the crash predictor is going to collide with the car
-            # it is attached to
+            collisions.extend(pygame.sprite.spritecollide(car.crashPredictor, self.personGroup, False))
+            
             if len(collisions) > 0 and ((collisions[0] is not car) or (len(collisions) > 1)):
                 car.velocity.x *= 0.9
             elif car.velocity.magnitude() < car.maxVelocity:
