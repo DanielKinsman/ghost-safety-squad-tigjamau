@@ -131,6 +131,8 @@ class Game(object):
     def run(self):
         clock = pygame.time.Clock()
         self.possessToggle = False
+        self.screen.blit(self.background, (0, 0))
+        
         self.bail = False
         while not self.bail:
             elapsed = clock.tick(60)
@@ -153,7 +155,10 @@ class Game(object):
             self.spawnCars()
             
             #render
-            self.screen.blit(self.background, (0, 0))
+            self.personGroup.clear(self.screen, self.background)
+            self.carGroup.clear(self.screen, self.background)
+            self.playerGroup.clear(self.screen, self.background)
+            
             self.personGroup.draw(self.screen)
             self.carGroup.draw(self.screen)
             self.playerGroup.draw(self.screen)
