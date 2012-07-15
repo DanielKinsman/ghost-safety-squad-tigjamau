@@ -35,6 +35,7 @@ class Vehicle(pygame.sprite.DirtySprite):
         
     def update(self):
         self.position += self.velocity #need to include time elapsed here or the speed will depend on frame rate
+        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
         self.rect.center = self.position
         
     def brake(self, collisions):
@@ -93,7 +94,7 @@ class Player(pygame.sprite.DirtySprite):
                 self.image = self.baseimage
             else:
                 angle = self.animationFrameCount * 16
-                scale = 0.25 + (0.75 / max(60 - self.animationFrameCount*2, 1))
+                scale = 0.25 + (0.75 / max(60 - self.animationFrameCount*1, 1))
                 self.image = pygame.transform.rotozoom(self.baseimage, angle, scale)
         else:
             if self.animationFrameCount > 60:
@@ -101,12 +102,12 @@ class Player(pygame.sprite.DirtySprite):
                 scale = 0.25
             else:
                 angle = self.animationFrameCount * -16
-                scale = 0.25 + (0.75 / (self.animationFrameCount*2))
+                scale = 0.25 + (0.75 / (self.animationFrameCount*1))
             
             self.image = pygame.transform.rotozoom(self.baseimage, angle, scale)
             
-        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.baseimage.get_height())
-        self.rect.center = self.position + euclid.Vector2(self.image.get_width() / 2, self.image.get_height() / 2)
+        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        self.rect.center = self.position
         
         
     def possess(self, person):
@@ -147,7 +148,6 @@ class Person(pygame.sprite.DirtySprite):
             if self.currentDirection.x < 0:
                 angle = -angle
             
-            #frame = random.choice([self.baseimage, self.baseImageStepLeft, self.baseImageStepRight])
             self.animationFrameCount += 1
             if self.animationFrameCount % 30 == 0:
                 self.animationFrameCount = 0
@@ -157,6 +157,7 @@ class Person(pygame.sprite.DirtySprite):
                     self.currentBaseImage = self.baseImageStepLeft
             
             self.image = pygame.transform.rotate(self.currentBaseImage, angle)
+            self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
             self.rect.center = self.position
         
     def kill(self):
