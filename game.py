@@ -79,6 +79,7 @@ class Player(pygame.sprite.DirtySprite):
         self.direction = euclid.Vector2(0, 0)
         self.speed = 3
         self.animationFrameCount = 0
+        self.hostGoalY = 0
         
     def update(self):
         self.position += self.direction * self.speed
@@ -88,6 +89,7 @@ class Player(pygame.sprite.DirtySprite):
                 self.dispossess()
             else:
                 self.host.position = euclid.Vector2(self.position.x, self.position.y)
+                self.host.goal = self.position + (self.direction * 10)
                 
         self.animationFrameCount += 1
         if self.host is None:
@@ -114,8 +116,10 @@ class Player(pygame.sprite.DirtySprite):
     def possess(self, person):
         self.host = person
         self.animationFrameCount = 0
+        self.hostGoalY = self.host.goal.y
         
     def dispossess(self):
+        self.host.goal = euclid.Vector2(self.host.position.x, self.hostGoalY)
         self.host = None
         self.animationFrameCount = 0
         
@@ -143,7 +147,10 @@ class Person(pygame.sprite.DirtySprite):
             velocity = self.currentDirection * self.speed
             self.position += velocity
         
-            angle = math.degrees(self.currentDirection.angle(euclid.Vector2(0, 1)))
+            try:
+                angle = math.degrees(self.currentDirection.angle(euclid.Vector2(0, 1)))
+            except ZeroDivisionError:
+                angle = 0 #no direction, probably possessed and no keys depressed
             
             # bit of a hack
             if self.currentDirection.x < 0:
