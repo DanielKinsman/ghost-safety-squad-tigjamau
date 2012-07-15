@@ -397,16 +397,16 @@ class Game(object):
         self.player.direction = euclid.Vector2(0, 0)
         
         pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_a]:
+        if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
             self.player.direction.x -= 1
             
-        if pressed[pygame.K_d]:
+        if pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
             self.player.direction.x += 1
             
-        if pressed[pygame.K_w]:
+        if pressed[pygame.K_w] or pressed[pygame.K_UP]:
             self.player.direction.y -= 1
             
-        if pressed[pygame.K_s]:
+        if pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
             self.player.direction.y += 1
                 
 
