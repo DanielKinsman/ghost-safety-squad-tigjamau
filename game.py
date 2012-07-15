@@ -75,7 +75,7 @@ class Player(pygame.sprite.DirtySprite):
         self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
         self.host = None
         self.direction = euclid.Vector2(0, 0)
-        self.speed = 5
+        self.speed = 3
         
     def update(self):
         self.position += self.direction * self.speed
@@ -386,6 +386,8 @@ class Game(object):
                     self.possessToggle = False
                 else:
                     pass
+            elif event.type == pygame.QUIT:
+                self.bail = True
             else:
                 pass
             
