@@ -54,6 +54,7 @@ class Vehicle(pygame.sprite.DirtySprite):
                 
     def accelerate(self):
         self.braking = False
+        self.brakesound.stop()
         
         #todo set acceleration based on vehicle type
         self.velocity.x *= 1.1
@@ -182,6 +183,7 @@ class Game(object):
         pygame.mixer.init()
         self.splat = pygame.mixer.Sound("sound/splat.ogg")
         self.tiresqueal = pygame.mixer.Sound("sound/tiresqueal.ogg")
+        self.trambell = pygame.mixer.Sound("sound/trambell.ogg")
         
         self.background = pygame.image.load("images/background.png")
         
@@ -335,7 +337,7 @@ class Game(object):
             elif vehicleType == 'motorbike':
                 wheels = Vehicle(self.motorbikeimage, Game.MOTORBIKE_VELOCITY, self.tiresqueal)
             else:
-                wheels = Vehicle(self.tramimage, Game.TRAM_VELOCITY, self.tiresqueal)
+                wheels = Vehicle(self.tramimage, Game.TRAM_VELOCITY, self.trambell)
             
             #pick a random side (left or right)
             x = random.choice([-100, self.screen.get_width() + 100])
