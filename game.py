@@ -205,8 +205,8 @@ class Game(object):
     VECTOR_COMPARE_MIN_DELTA = 0.0001
     WIDTH = 1024
     HEIGHT = 768
-    SPAWN_PEOPLE_BELOW = 2
-    SPAWN_CARS_BELOW = 8
+    SPAWN_PEOPLE_INCREASE_TIME = 30000
+    SPAWN_CARS_BELOW = 16
     CAR_VELOCITY = 9
     CAR_ACCELERATION = 0.5
     TRUCK_VELOCITY = 6
@@ -264,17 +264,25 @@ class Game(object):
         self.possessToggle = False
         self.gameover = False
         
+        self.concurrentPeople = 1
+        
         self.screen.blit(self.background, (0, 0))
         pygame.mixer.music.play(-1)
     
     def run(self):      
         clock = pygame.time.Clock()
+        lastDifficultyIncrease = pygame.time.get_ticks()
         
         self.bail = False
         while not self.bail:
             elapsed = clock.tick(45)
             #if elapsed > 20:
             #    print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
+            
+            now = pygame.time.get_ticks()
+            if now - lastDifficultyIncrease > Game.SPAWN_PEOPLE_INCREASE_TIME * self.concurrentPeople:
+                lastDifficultyIncrease = now
+                self.concurrentPeople += 1
             
             #input
             self.processInput()
@@ -343,9 +351,17 @@ class Game(object):
             collisions = pygame.sprite.spritecollide(car.crashPredictor, self.carGroup, False)
             collisions.extend(pygame.sprite.spritecollide(car.crashPredictor, self.personGroup, False))
             
+            braked = False
+            
             if len(collisions) > 0 and ((collisions[0] is not car) or (len(collisions) > 1)):
-                car.brake(collisions)
-            elif car.velocity.magnitude() < car.maxVelocity:
+                #don't brake for dead people
+                for sprite in collisions:
+                    if (type(sprite) is not Person) or (not sprite.dead):
+                        car.brake(collisions)
+                        braked = True
+            
+            
+            if (not braked) and (car.velocity.magnitude() < car.maxVelocity):
                 car.accelerate()
                 
             
@@ -372,7 +388,7 @@ class Game(object):
             else:
                 pass
             
-        if aliveCount < Game.SPAWN_PEOPLE_BELOW:
+        if aliveCount < self.concurrentPeople:
             self.spawnPerson()
             
     def spawnPerson(self):
