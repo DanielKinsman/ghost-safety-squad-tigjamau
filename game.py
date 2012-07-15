@@ -70,28 +70,52 @@ class Vehicle(pygame.sprite.DirtySprite):
 class Player(pygame.sprite.DirtySprite):
     def __init__(self, image):
         super(Player, self).__init__()
-        self.image = pygame.image.load(image)
+        self.baseimage = pygame.image.load(image)
         self.position = euclid.Vector2(0, 0)
-        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.image.get_height())
+        self.rect = pygame.Rect(0, 0, self.baseimage.get_width(), self.baseimage.get_height())
         self.host = None
         self.direction = euclid.Vector2(0, 0)
         self.speed = 3
+        self.animationFrameCount = 0
         
     def update(self):
         self.position += self.direction * self.speed
-        self.rect.center = self.position
         
         if self.host is not None:
             if self.host.dead:
                 self.dispossess()
             else:
                 self.host.position = euclid.Vector2(self.position.x, self.position.y)
+                
+        self.animationFrameCount += 1
+        if self.host is None:
+            if self.animationFrameCount > 60:
+                self.image = self.baseimage
+            else:
+                angle = self.animationFrameCount * 16
+                scale = 0.25 + (0.75 / max(60 - self.animationFrameCount*2, 1))
+                self.image = pygame.transform.rotozoom(self.baseimage, angle, scale)
+        else:
+            if self.animationFrameCount > 60:
+                angle = 0
+                scale = 0.25
+            else:
+                angle = self.animationFrameCount * -16
+                scale = 0.25 + (0.75 / (self.animationFrameCount*2))
+            
+            self.image = pygame.transform.rotozoom(self.baseimage, angle, scale)
+            
+        self.rect = pygame.Rect(0, 0, self.image.get_width(), self.baseimage.get_height())
+        self.rect.center = self.position + euclid.Vector2(self.image.get_width() / 2, self.image.get_height() / 2)
+        
         
     def possess(self, person):
         self.host = person
+        self.animationFrameCount = 0
         
     def dispossess(self):
         self.host = None
+        self.animationFrameCount = 0
         
 class Person(pygame.sprite.DirtySprite):
     def __init__(self, image, stepLeftImage, stepRightImage, deadimage, deathsound):
