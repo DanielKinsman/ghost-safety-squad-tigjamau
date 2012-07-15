@@ -137,11 +137,12 @@ class Game(object):
     VECTOR_COMPARE_MIN_DELTA = 0.0001
     WIDTH = 1024
     HEIGHT = 768
-    SPAWN_PEOPLE_BELOW = 1
-    SPAWN_CARS_BELOW = 4
+    SPAWN_PEOPLE_BELOW = 2
+    SPAWN_CARS_BELOW = 8
     CAR_VELOCITY = 10
     TRUCK_VELOCITY = 6
     MOTORBIKE_VELOCITY = 15
+    TRAM_VELOCITY = 3
     CAR_SPAWN_DELAY_AVERAGE = 1500
         
     def __init__(self):
@@ -156,6 +157,7 @@ class Game(object):
         self.carimage = pygame.image.load('images/car.png')
         self.truckimage = pygame.image.load('images/truck.png')
         self.motorbikeimage = pygame.image.load('images/motorbike.png')
+        self.tramimage = pygame.image.load('images/tram.png')
         self.carGroup = pygame.sprite.RenderUpdates()
         self.crashPredictGroup = pygame.sprite.RenderUpdates()
         
@@ -180,8 +182,8 @@ class Game(object):
         self.bail = False
         while not self.bail:
             elapsed = clock.tick(60)
-            #if elapsed > 32:
-            #    print("frametime:%(elapsed)03d" % {'elapsed': elapsed})
+            if elapsed > 20:
+                print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
             
             #input
             self.processInput()
@@ -279,7 +281,7 @@ class Game(object):
         goalY = self.screen.get_height() + 100 if y == 0 else -100
         
         #pick random x value
-        x = random.randint(10, self.screen.get_width() - 10)
+        x = random.randint(200, self.screen.get_width() - 200)
         
         #spawn person a x y
         person = Person('images/person.png', 'images/personstepleft.png', 'images/personstepright.png', 'images/deadperson.png', self.splat)
@@ -299,13 +301,15 @@ class Game(object):
         
         if len(self.carGroup.sprites()) < Game.SPAWN_CARS_BELOW:
             #car or truck?
-            vehicleType = random.choice(['car', 'truck', 'motorbike'])
+            vehicleType = random.choice(['car', 'truck', 'motorbike', 'tram'])
             if vehicleType == 'car':
                 wheels = Vehicle(self.carimage, Game.CAR_VELOCITY)
             elif vehicleType == 'truck':
                 wheels = Vehicle(self.truckimage, Game.TRUCK_VELOCITY)
-            else:
+            elif vehicleType == 'motorbike':
                 wheels = Vehicle(self.motorbikeimage, Game.MOTORBIKE_VELOCITY)
+            else:
+                wheels = Vehicle(self.tramimage, Game.TRAM_VELOCITY)
             
             #pick a random side (left or right)
             x = random.choice([-100, self.screen.get_width() + 100])
@@ -313,10 +317,10 @@ class Game(object):
             
             if x <= 0:
                 xVelocity = wheels.maxVelocity
-                y += -200
+                y += -200 if vehicleType != 'tram' else -70
             else:
                 xVelocity = -wheels.maxVelocity
-                y += 200
+                y += 200 if vehicleType != 'tram' else 70
                 wheels.image = pygame.transform.flip(wheels.image, True, False)
             
             wheels.velocity = euclid.Vector2(xVelocity, 0)
