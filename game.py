@@ -77,7 +77,7 @@ class Player(pygame.sprite.DirtySprite):
         self.rect = pygame.Rect(0, 0, self.baseimage.get_width(), self.baseimage.get_height())
         self.host = None
         self.direction = euclid.Vector2(0, 0)
-        self.speed = 3
+        self.speed = 7
         self.animationFrameCount = 0
         self.hostGoalY = 0
         
@@ -117,11 +117,13 @@ class Player(pygame.sprite.DirtySprite):
         self.host = person
         self.animationFrameCount = 0
         self.hostGoalY = self.host.goal.y
+        self.speed = person.speed * 3
         
     def dispossess(self):
         self.host.goal = euclid.Vector2(self.host.position.x, self.hostGoalY)
         self.host = None
         self.animationFrameCount = 0
+        self.speed = 7
         
 class Person(pygame.sprite.DirtySprite):
     def __init__(self, image, stepLeftImage, stepRightImage, deadimage, deathsound):
