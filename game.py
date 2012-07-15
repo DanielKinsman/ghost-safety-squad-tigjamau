@@ -212,6 +212,7 @@ class Game(object):
     TRAM_VELOCITY = 3
     TRAM_ACCELERATION = 0.025
     CAR_SPAWN_DELAY_AVERAGE = 1500
+    DEATHS_TILL_GAME_OVER = 1
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT), pygame.DOUBLEBUF)
@@ -232,10 +233,15 @@ class Game(object):
         self.truckimage = pygame.image.load('images/truck.png')
         self.motorbikeimage = pygame.image.load('images/motorbike.png')
         self.tramimage = pygame.image.load('images/tram.png')
-        self.carGroup = pygame.sprite.RenderUpdates()
-        self.crashPredictGroup = pygame.sprite.RenderUpdates()
         
         self.carsSpawnDelay = Game.CAR_SPAWN_DELAY_AVERAGE
+        self.bail = False
+        
+        self.reset()
+        
+    def reset(self):
+        self.carGroup = pygame.sprite.RenderUpdates()
+        self.crashPredictGroup = pygame.sprite.RenderUpdates()
         self.carSpawnLast = 0
         
         self.player = Player('images/player.png')
@@ -246,19 +252,23 @@ class Game(object):
         self.personGroup = pygame.sprite.RenderUpdates(self.people)
         
         self.possessToggle = False
-        self.bail = False
-    
-    def run(self):
-        clock = pygame.time.Clock()
-        self.possessToggle = False
+        self.gameover = False
+        
         self.screen.blit(self.background, (0, 0))
         pygame.mixer.music.play(-1)
+    
+    def run(self):      
+        clock = pygame.time.Clock()
         
         self.bail = False
         while not self.bail:
             elapsed = clock.tick(45)
             #if elapsed > 20:
             #    print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
+            
+            if self.gameover:
+                pygame.mixer.music.stop()
+                self.reset()
             
             #input
             self.processInput()
@@ -275,6 +285,13 @@ class Game(object):
             self.runCars()
             self.runPeople()
             self.runPlayer()
+            
+            dead = 0
+            for person in self.personGroup:
+                dead += 1 if person.dead else 0
+                
+            if dead >= Game.DEATHS_TILL_GAME_OVER:
+                self.gameover = True
             
             #render
             self.personGroup.clear(self.screen, self.background)
