@@ -70,6 +70,8 @@ class Vehicle(pygame.sprite.DirtySprite):
         
         
 class Player(pygame.sprite.DirtySprite):
+    GHOST_SPEED = 10
+    POSSESS_SPEED_MULTIPLIER = 4
     def __init__(self, image):
         super(Player, self).__init__()
         self.baseimage = pygame.image.load(image)
@@ -77,7 +79,7 @@ class Player(pygame.sprite.DirtySprite):
         self.rect = pygame.Rect(0, 0, self.baseimage.get_width(), self.baseimage.get_height())
         self.host = None
         self.direction = euclid.Vector2(0, 0)
-        self.speed = 7
+        self.speed = Player.GHOST_SPEED
         self.animationFrameCount = 0
         self.hostGoalY = 0
         
@@ -117,13 +119,13 @@ class Player(pygame.sprite.DirtySprite):
         self.host = person
         self.animationFrameCount = 0
         self.hostGoalY = self.host.goal.y
-        self.speed = person.speed * 3
+        self.speed = person.speed * Player.POSSESS_SPEED_MULTIPLIER
         
     def dispossess(self):
         self.host.goal = euclid.Vector2(self.host.position.x, self.hostGoalY)
         self.host = None
         self.animationFrameCount = 0
-        self.speed = 7
+        self.speed = Player.GHOST_SPEED
         
 class Person(pygame.sprite.DirtySprite):
     def __init__(self, image, stepLeftImage, stepRightImage, deadimage, deathsound):
@@ -206,15 +208,15 @@ class Game(object):
     SPAWN_PEOPLE_BELOW = 2
     SPAWN_CARS_BELOW = 8
     CAR_VELOCITY = 9
-    CAR_ACCELERATION = 0.1
+    CAR_ACCELERATION = 0.5
     TRUCK_VELOCITY = 6
-    TRUCK_ACCELERATION = 0.05
+    TRUCK_ACCELERATION = 0.035
     MOTORBIKE_VELOCITY = 12
-    MOTORBIKE_ACCELERATION = 0.15
+    MOTORBIKE_ACCELERATION = 0.1
     TRAM_VELOCITY = 3
     TRAM_ACCELERATION = 0.025
     CAR_SPAWN_DELAY_AVERAGE = 1500
-    DEATHS_TILL_GAME_OVER = 1
+    DEATHS_TILL_GAME_OVER = 3
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT), pygame.DOUBLEBUF)
