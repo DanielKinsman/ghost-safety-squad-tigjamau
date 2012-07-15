@@ -234,6 +234,12 @@ class Game(object):
         self.motorbikeimage = pygame.image.load('images/motorbike.png')
         self.tramimage = pygame.image.load('images/tram.png')
         
+        gameoversprite = pygame.sprite.DirtySprite()
+        gameoversprite.image = pygame.image.load('images/gameover.png')
+        gameoversprite.rect = pygame.Rect(0, 0, gameoversprite.image.get_width(), gameoversprite.image.get_height())
+        gameoversprite.rect.center = (gameoversprite.image.get_width() / 2 + 50, gameoversprite.image.get_height() / 2 + 50)
+        self.gameoverGroup = pygame.sprite.RenderUpdates([gameoversprite])
+        
         self.carsSpawnDelay = Game.CAR_SPAWN_DELAY_AVERAGE
         self.bail = False
         
@@ -266,9 +272,7 @@ class Game(object):
             #if elapsed > 20:
             #    print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
             
-            if self.gameover:
-                pygame.mixer.music.stop()
-                #show gameover sprite
+            
             
             #input
             self.processInput()
@@ -303,6 +307,11 @@ class Game(object):
             self.carGroup.draw(self.screen)
             self.playerGroup.draw(self.screen)
             #self.crashPredictGroup.draw(self.screen) #debug only
+            
+            if self.gameover:
+                pygame.mixer.music.stop()
+                self.gameoverGroup.draw(self.screen)
+            
             pygame.display.flip()
         
         #clean up before exit
