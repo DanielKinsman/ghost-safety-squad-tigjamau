@@ -274,8 +274,6 @@ class Game(object):
             #if elapsed > 20:
             #    print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
             
-            
-            
             #input
             self.processInput()
                     
@@ -383,8 +381,13 @@ class Game(object):
         #pick random x value
         x = random.randint(200, self.screen.get_width() - 200)
         
-        #spawn person a x y
-        person = Person('images/person.png', 'images/personstepleft.png', 'images/personstepright.png', 'images/deadperson.png', self.splat)
+        #spawn person at x y
+        character = random.choice(['1', '2', '3'])
+        stand = 'images/person' + character + '.png'
+        stepLeft = 'images/personstepleft' + character + '.png'
+        stepRight = 'images/personstepright' + character + '.png'
+        dead = 'images/deadperson' + character + '.png'
+        person = Person(stand, stepLeft, stepRight, dead, self.splat)
         person.position = euclid.Vector2(x, y)
         person.goal = euclid.Vector2(x, goalY)
         self.people.append(person)
