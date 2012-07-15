@@ -268,7 +268,7 @@ class Game(object):
             
             if self.gameover:
                 pygame.mixer.music.stop()
-                self.reset()
+                #show gameover sprite
             
             #input
             self.processInput()
@@ -431,8 +431,10 @@ class Game(object):
                 if event.key == pygame.K_ESCAPE:
                     self.bail = True
                     break
-                elif event.key == pygame.K_SPACE:
+                elif event.key == pygame.K_SPACE and not self.gameover:
                     self.possessToggle = True
+                elif event.key == pygame.K_RETURN and self.gameover:
+                    self.reset()
                 else:
                     pass
             elif event.type == pygame.KEYUP:
@@ -449,6 +451,9 @@ class Game(object):
         pygame.event.clear()
         
         self.player.direction = euclid.Vector2(0, 0)
+        
+        if self.gameover:
+            return
         
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
