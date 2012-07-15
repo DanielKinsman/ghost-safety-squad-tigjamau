@@ -182,7 +182,9 @@ class Game(object):
         
         pygame.mixer.init()
         self.splat = pygame.mixer.Sound("sound/splat.ogg")
-        self.tiresqueal = pygame.mixer.Sound("sound/tiresqueal.ogg")
+        self.carbrakehorn = pygame.mixer.Sound("sound/carbrakehorn.ogg")
+        self.truckbrakehorn = pygame.mixer.Sound("sound/truckbrakehorn.ogg")
+        self.motorbikebrakehorn = pygame.mixer.Sound("sound/motorbikebrakehorn.ogg")
         self.trambell = pygame.mixer.Sound("sound/trambell.ogg")
         
         self.background = pygame.image.load("images/background.png")
@@ -331,11 +333,11 @@ class Game(object):
             #car or truck?
             vehicleType = random.choice(['car', 'truck', 'motorbike', 'tram'])
             if vehicleType == 'car':
-                wheels = Vehicle(self.carimage, Game.CAR_VELOCITY, self.tiresqueal)
+                wheels = Vehicle(self.carimage, Game.CAR_VELOCITY, self.carbrakehorn)
             elif vehicleType == 'truck':
-                wheels = Vehicle(self.truckimage, Game.TRUCK_VELOCITY, self.tiresqueal)
+                wheels = Vehicle(self.truckimage, Game.TRUCK_VELOCITY, self.truckbrakehorn)
             elif vehicleType == 'motorbike':
-                wheels = Vehicle(self.motorbikeimage, Game.MOTORBIKE_VELOCITY, self.tiresqueal)
+                wheels = Vehicle(self.motorbikeimage, Game.MOTORBIKE_VELOCITY, self.motorbikebrakehorn)
             else:
                 wheels = Vehicle(self.tramimage, Game.TRAM_VELOCITY, self.trambell)
             
