@@ -187,6 +187,8 @@ class Game(object):
         self.motorbikebrakehorn = pygame.mixer.Sound("sound/motorbikebrakehorn.ogg")
         self.trambell = pygame.mixer.Sound("sound/trambell.ogg")
         
+        pygame.mixer.music.load("sound/ghostsquishies.ogg")
+        
         self.background = pygame.image.load("images/background.png")
         
         self.carimage = pygame.image.load('images/car.png')
@@ -213,6 +215,7 @@ class Game(object):
         clock = pygame.time.Clock()
         self.possessToggle = False
         self.screen.blit(self.background, (0, 0))
+        pygame.mixer.music.play(-1)
         
         self.bail = False
         while not self.bail:
