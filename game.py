@@ -216,7 +216,7 @@ class Game(object):
     TRAM_VELOCITY = 3
     TRAM_ACCELERATION = 0.025
     CAR_SPAWN_DELAY_AVERAGE = 1500
-    DEATHS_TILL_GAME_OVER = 3
+    DEATHS_TILL_GAME_OVER = 1
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT), pygame.DOUBLEBUF)
@@ -354,11 +354,14 @@ class Game(object):
             braked = False
             
             if len(collisions) > 0 and ((collisions[0] is not car) or (len(collisions) > 1)):
+                car.brake(collisions)
+                braked = True
                 #don't brake for dead people
-                for sprite in collisions:
-                    if (type(sprite) is not Person) or (not sprite.dead):
-                        car.brake(collisions)
-                        braked = True
+                #print(collisions)
+                #for sprite in collisions:
+                    #if (type(sprite) is not Person) or (not sprite.dead):
+                        #car.brake(collisions)
+                        #braked = True
             
             
             if (not braked) and (car.velocity.magnitude() < car.maxVelocity):
