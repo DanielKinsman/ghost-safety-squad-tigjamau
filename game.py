@@ -22,7 +22,7 @@ class CrashPredictor(pygame.sprite.Sprite):
         self.rect.center = self.vehicle.position + offset
 
 class Vehicle(pygame.sprite.DirtySprite):
-    def __init__(self, image, maxVelocity, brakesound):
+    def __init__(self, image, maxVelocity, brakesound, acceleration):
         super(Vehicle, self).__init__()
         self.image = image
         self.position = euclid.Vector2(0, 0)
@@ -32,6 +32,7 @@ class Vehicle(pygame.sprite.DirtySprite):
         self.maxVelocity = maxVelocity
         self.braking = False
         self.brakesound = brakesound
+        self.acceleration = acceleration
         
     def update(self):
         self.position += self.velocity #need to include time elapsed here or the speed will depend on frame rate
@@ -40,7 +41,7 @@ class Vehicle(pygame.sprite.DirtySprite):
         
     def brake(self, collisions):
         #todo set deceleration based on vehicle type
-        self.velocity.x *= 0.9
+        self.velocity.x *= 1.0 - self.acceleration
         
         #only play sounds when we first start braking
         if self.braking:
@@ -58,7 +59,7 @@ class Vehicle(pygame.sprite.DirtySprite):
         self.brakesound.stop()
         
         #todo set acceleration based on vehicle type
-        self.velocity.x *= 1.1
+        self.velocity.x *= 1.0 + self.acceleration
                 
         #if the car stops, give it a little push. This is a bit hackish, eh?
         #especially the use of Game.HEIGHT rather than screen.get_height()
@@ -195,10 +196,14 @@ class Game(object):
     HEIGHT = 768
     SPAWN_PEOPLE_BELOW = 2
     SPAWN_CARS_BELOW = 8
-    CAR_VELOCITY = 10
+    CAR_VELOCITY = 9
+    CAR_ACCELERATION = 0.1
     TRUCK_VELOCITY = 6
-    MOTORBIKE_VELOCITY = 15
+    TRUCK_ACCELERATION = 0.05
+    MOTORBIKE_VELOCITY = 12
+    MOTORBIKE_ACCELERATION = 0.15
     TRAM_VELOCITY = 3
+    TRAM_ACCELERATION = 0.025
     CAR_SPAWN_DELAY_AVERAGE = 1500
         
     def __init__(self):
@@ -363,13 +368,13 @@ class Game(object):
             #car or truck?
             vehicleType = random.choice(['car', 'truck', 'motorbike', 'tram'])
             if vehicleType == 'car':
-                wheels = Vehicle(self.carimage, Game.CAR_VELOCITY, self.carbrakehorn)
+                wheels = Vehicle(self.carimage, Game.CAR_VELOCITY, self.carbrakehorn, Game.CAR_ACCELERATION)
             elif vehicleType == 'truck':
-                wheels = Vehicle(self.truckimage, Game.TRUCK_VELOCITY, self.truckbrakehorn)
+                wheels = Vehicle(self.truckimage, Game.TRUCK_VELOCITY, self.truckbrakehorn, Game.TRUCK_ACCELERATION)
             elif vehicleType == 'motorbike':
-                wheels = Vehicle(self.motorbikeimage, Game.MOTORBIKE_VELOCITY, self.motorbikebrakehorn)
+                wheels = Vehicle(self.motorbikeimage, Game.MOTORBIKE_VELOCITY, self.motorbikebrakehorn, Game.MOTORBIKE_ACCELERATION)
             else:
-                wheels = Vehicle(self.tramimage, Game.TRAM_VELOCITY, self.trambell)
+                wheels = Vehicle(self.tramimage, Game.TRAM_VELOCITY, self.trambell, Game.TRAM_ACCELERATION)
             
             #pick a random side (left or right)
             x = random.choice([-100, self.screen.get_width() + 100])
