@@ -217,8 +217,8 @@ class Game(object):
         self.bail = False
         while not self.bail:
             elapsed = clock.tick(60)
-            if elapsed > 20:
-                print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
+            #if elapsed > 20:
+            #    print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
             
             #input
             self.processInput()
@@ -257,7 +257,9 @@ class Game(object):
             if not person.dead:
                 collisions = pygame.sprite.spritecollide(person, self.carGroup, False)
                 if len(collisions) > 0:
-                    person.kill()
+                    for car in collisions:
+                        if car.velocity.magnitude() > 1.0:
+                            person.kill()
                 elif offscreen(person, self.screen):
                     self.personGroup.remove(person)
                     self.people.remove(person)
