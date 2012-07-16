@@ -10,4 +10,12 @@ Move around with WSAD or the arrow keys (up down left right).
 Possess people with the spacebar.
 Try to save them from getting killed.
 
--Have fun!
+-==Installation and running==-
+Linux:
+    install python and pygame (e.g. sudo apt-get install python pygame)
+    run game.y (./game.py)
+  
+
+Have fun!
+
+danielkinsman+gss@gmail.com
