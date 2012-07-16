@@ -281,13 +281,13 @@ class Game(object):
         self.gameover = False
         
         self.concurrentPeople = 1
+        self.lastDifficultyIncrease = pygame.time.get_ticks()
         
         self.screen.blit(self.background, (0, 0))
         pygame.mixer.music.play(-1)
     
     def run(self):      
         clock = pygame.time.Clock()
-        lastDifficultyIncrease = pygame.time.get_ticks()
         
         self.bail = False
         while not self.bail:
@@ -296,8 +296,8 @@ class Game(object):
             #    print("frametime drop:%(elapsed)03d" % {'elapsed': elapsed})
             
             now = pygame.time.get_ticks()
-            if now - lastDifficultyIncrease > Game.SPAWN_PEOPLE_INCREASE_TIME * self.concurrentPeople:
-                lastDifficultyIncrease = now
+            if now - self.lastDifficultyIncrease > Game.SPAWN_PEOPLE_INCREASE_TIME * self.concurrentPeople:
+                self.lastDifficultyIncrease = now
                 self.concurrentPeople += 1
             
             #input
