@@ -13,7 +13,7 @@ Try to save them from getting killed.
 -==Installation and running==-
 Linux:
     install python and pygame (e.g. sudo apt-get install python pygame)
-    run game.y (./game.py)
+    run game.py (./game.py)
   
 
 Have fun!
