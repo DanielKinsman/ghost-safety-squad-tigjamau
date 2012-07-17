@@ -233,7 +233,7 @@ class Game(object):
     TRAM_ACCELERATION = 0.025
     CAR_SPAWN_DELAY_AVERAGE = 1500
     DEATHS_TILL_GAME_OVER = 1
-    SAVES_TILL_WIN = 30
+    SAVES_TILL_WIN = 20
     FONT_SIZE = 20
         
     def __init__(self):
@@ -264,6 +264,8 @@ class Game(object):
         gameoversprite.rect = pygame.Rect(0, 0, gameoversprite.image.get_width(), gameoversprite.image.get_height())
         gameoversprite.rect.center = (gameoversprite.image.get_width() / 2 + 50, gameoversprite.image.get_height() / 2 + 50)
         self.gameoverGroup = pygame.sprite.RenderUpdates([gameoversprite])
+        
+        self.winimage = pygame.image.load('images/win.png')
         
         self.carsSpawnDelay = Game.CAR_SPAWN_DELAY_AVERAGE
         self.bail = False
@@ -308,6 +310,16 @@ class Game(object):
             
             #input
             self.processInput()
+            
+            if self.peopleSaved >= Game.SAVES_TILL_WIN:
+                self.gameover = True
+                while self.gameover and (not self.bail):
+                    clock.tick(10)
+                    self.screen.blit(self.winimage, (0, 0))
+                    pygame.display.flip()
+                    self.processInput()
+                    
+                continue
                     
             #sim
             self.spawnPeople()
