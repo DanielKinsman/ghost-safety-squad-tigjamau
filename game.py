@@ -233,6 +233,8 @@ class Game(object):
     TRAM_ACCELERATION = 0.025
     CAR_SPAWN_DELAY_AVERAGE = 1500
     DEATHS_TILL_GAME_OVER = 1
+    SAVES_TILL_WIN = 30
+    FONT_SIZE = 20
         
     def __init__(self):
         self.screen = pygame.display.set_mode((Game.WIDTH, Game.HEIGHT), pygame.DOUBLEBUF)
@@ -246,6 +248,9 @@ class Game(object):
         self.trambell = pygame.mixer.Sound("sound/trambell.ogg")
         
         pygame.mixer.music.load("sound/ghostsquishies.ogg")
+        
+        pygame.font.init()
+        self.font = pygame.font.Font(pygame.font.get_default_font(), Game.FONT_SIZE)
         
         self.background = pygame.image.load("images/background.png")
         
@@ -280,6 +285,7 @@ class Game(object):
         self.possessToggle = False
         self.gameover = False
         
+        self.peopleSaved = 0
         self.concurrentPeople = 1
         self.lastDifficultyIncrease = pygame.time.get_ticks()
         
@@ -333,6 +339,9 @@ class Game(object):
             self.carGroup.draw(self.screen)
             self.playerGroup.draw(self.screen)
             #self.crashPredictGroup.draw(self.screen) #debug only
+            fontsurf = self.font.render("Saved %(saved)d / %(savesTillWin)d" % {'saved': self.peopleSaved, 'savesTillWin' : Game.SAVES_TILL_WIN}, True, pygame.Color("white"))
+            self.screen.blit(self.background, (0, 0), fontsurf.get_rect())
+            self.screen.blit(fontsurf, (0, 0))
             
             if self.gameover:
                 pygame.mixer.music.stop()
@@ -343,6 +352,7 @@ class Game(object):
         #clean up before exit
         pygame.display.quit()
         pygame.mixer.quit()
+        pygame.font.quit()
         
     def runPeople(self):
         for person in self.people:
@@ -355,6 +365,7 @@ class Game(object):
                 elif offscreen(person, self.screen):
                     self.personGroup.remove(person)
                     self.people.remove(person)
+                    self.peopleSaved += 1
             else:
                 pass
             
