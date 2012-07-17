@@ -507,16 +507,16 @@ class Game(object):
             return
         
         pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_a] or pressed[pygame.K_LEFT]:
+        if (pressed[pygame.K_a] or pressed[pygame.K_LEFT]) and self.player.position.x > 0:
             self.player.direction.x -= 1
             
-        if pressed[pygame.K_d] or pressed[pygame.K_RIGHT]:
+        if (pressed[pygame.K_d] or pressed[pygame.K_RIGHT]) and self.player.position.x < self.screen.get_width():
             self.player.direction.x += 1
             
-        if pressed[pygame.K_w] or pressed[pygame.K_UP]:
+        if (pressed[pygame.K_w] or pressed[pygame.K_UP]) and self.player.position.y > 0:
             self.player.direction.y -= 1
             
-        if pressed[pygame.K_s] or pressed[pygame.K_DOWN]:
+        if (pressed[pygame.K_s] or pressed[pygame.K_DOWN]) and self.player.position.y < self.screen.get_height():
             self.player.direction.y += 1
                 
 
