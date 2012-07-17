@@ -70,7 +70,7 @@ class BuildExe:
         self.icon_file = None
  
         #Extra files/dirs copied to game
-        self.extra_datas = ['images', 'sound', 'LICENSE', 'README']
+        self.extra_datas = ['images', 'sound', 'LICENSE', 'README', 'Profaisal-EliteRiqaV1.0.ttf']
  
         #Extra/excludes python modules
         self.extra_modules = []

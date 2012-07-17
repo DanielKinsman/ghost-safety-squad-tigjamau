@@ -250,7 +250,7 @@ class Game(object):
         pygame.mixer.music.load("sound/ghostsquishies.ogg")
         
         pygame.font.init()
-        self.font = pygame.font.Font(pygame.font.get_default_font(), Game.FONT_SIZE)
+        self.font = pygame.font.Font("Profaisal-EliteRiqaV1.0.ttf", Game.FONT_SIZE)
         
         self.background = pygame.image.load("images/background.png")
         
