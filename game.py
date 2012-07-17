@@ -377,7 +377,8 @@ class Game(object):
                 elif offscreen(person, self.screen):
                     self.personGroup.remove(person)
                     self.people.remove(person)
-                    self.peopleSaved += 1
+                    if not self.gameover:
+                        self.peopleSaved += 1
             else:
                 pass
             
