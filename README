@@ -12,9 +12,19 @@ Try to save them from getting killed.
 
 -==Installation and running==-
 Linux:
-    install python and pygame (e.g. sudo apt-get install python pygame)
-    run game.py (./game.py)
-  
+    Install python and pygame (e.g. sudo apt-get install python pygame)
+    Run game.py (./game.py)
+
+Mac OSX:
+    Not sure as I don't have a mac.
+    Make sure your version of python is up to date (need version at least 2.7.x)
+    Then try installing pygame from http://www.pygame.org/download.shtml
+    Then run game.py
+
+Windows:
+    Unzip the zip file and run game.exe
+    (Make sure you are using the prepackaged windows binary
+    from http://github.com/DanielKinsman/ghost-safety-squad-tigjamau/downloads)
 
 Have fun!
 
